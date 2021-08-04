@@ -90,6 +90,50 @@ class TestSafetyCLI(unittest.TestCase):
         self.assertEqual(result.exit_code, 0)
         self.assertMultiLineEqual(result.output.rstrip(), expected_result)
 
+    @patch("safety.safety.get_licenses")
+    def test_license_json_lower_bound(self, get_licenses):
+        runner = CliRunner()
+
+        dirname = os.path.dirname(__file__)
+        with open(os.path.join(dirname, "test_db", "licenses.json")) as f:
+            licenses_db = json.loads(f.read())
+        get_licenses.return_value = licenses_db
+        reqs_path = os.path.join(dirname, "reqs_8.txt")
+
+        result = runner.invoke(cli.cli, ['license', '--file', reqs_path, '--json', '--db', 'licenses.json'])
+        expected_result = json.dumps(
+            [{
+                "license": "BSD-3-Clause",
+                "package": "django",
+                "version": "1.11"
+            }],
+            indent=4, sort_keys=True
+        )
+        self.assertEqual(result.exit_code, 0)
+        self.assertMultiLineEqual(result.output.rstrip(), expected_result)
+
+    @patch("safety.safety.get_licenses")
+    def test_license_json_lower_bound(self, get_licenses):
+        runner = CliRunner()
+
+        dirname = os.path.dirname(__file__)
+        with open(os.path.join(dirname, "test_db", "licenses.json")) as f:
+            licenses_db = json.loads(f.read())
+        get_licenses.return_value = licenses_db
+        reqs_path = os.path.join(dirname, "reqs_8.txt")
+
+        result = runner.invoke(cli.cli, ['license', '--file', reqs_path, '--json', '--db', 'licenses.json'])
+        expected_result = json.dumps(
+            [{
+                "license": "BSD-3-Clause",
+                "package": "django",
+                "version": "1.11"
+            }],
+            indent=4, sort_keys=True
+        )
+        self.assertEqual(result.exit_code, 0)
+        self.assertMultiLineEqual(result.output.rstrip(), expected_result)
+
 
 class TestFormatter(unittest.TestCase):
 
@@ -511,6 +555,17 @@ class ReadRequirementsTestCase(unittest.TestCase):
         # this should find 2 bad packages
         dirname = os.path.dirname(__file__)
         test_filename = os.path.join(dirname, "reqs_1.txt")
+        with open(test_filename) as fh:
+            result = list(read_requirements(fh, resolve=True))
+        self.assertEqual(len(result), 2)
+
+    def test_recursive_requirement_lower_bound(self):
+        """
+        https://github.com/pyupio/safety/issues/132
+        """
+        # this should find 2 bad packages
+        dirname = os.path.dirname(__file__)
+        test_filename = os.path.join(dirname, "reqs_5.txt")
         with open(test_filename) as fh:
             result = list(read_requirements(fh, resolve=True))
         self.assertEqual(len(result), 2)

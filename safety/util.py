@@ -91,6 +91,10 @@ def read_requirements(fh, resolve=False):
                 if len(req.specifier._specs) == 1 and \
                         next(iter(req.specifier._specs))._spec[0] == "==":
                     yield Package(key=req.name, version=next(iter(req.specifier._specs))._spec[1])
+                elif len(req.specifier._specs) == 1 and \
+                        next(iter(req.specifier._specs))._spec[0] == ">=":
+                    yield Package(key=req.name, version=next(iter(req.specifier._specs))._spec[1])
+                # TODO: >, <=, <
                 else:
                     try:
                         fname = fh.name
